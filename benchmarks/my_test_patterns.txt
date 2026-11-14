@@ -1,0 +1,6 @@
+# hand-written patterns for my_test.bench
+# bit order: a b c d q   (q = scan value of the flip-flop)
+00000
+11111
+10101
+01110

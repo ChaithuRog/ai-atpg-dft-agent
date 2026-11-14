@@ -1,0 +1,18 @@
+# my_test.bench - small custom test circuit
+# 4 primary inputs, 2 primary outputs, 1 flip-flop
+# The gate t1 = AND(a, b) is REDUNDANT: y1 = OR(a, t1) = a,
+# so t1 stuck-at-0 can never be detected.
+INPUT(a)
+INPUT(b)
+INPUT(c)
+INPUT(d)
+OUTPUT(y1)
+OUTPUT(y2)
+
+q  = DFF(n3)
+t1 = AND(a, b)
+y1 = OR(a, t1)
+n1 = NAND(c, d)
+n2 = XOR(n1, q)
+n3 = NOR(b, n2)
+y2 = AND(n2, c)
