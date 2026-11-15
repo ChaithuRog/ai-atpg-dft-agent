@@ -11,6 +11,8 @@ Author: Madaka Chaithanya Nanda Kumar.
 
 ![GUI](docs/gui.png)
 
+![Block diagram](docs/block_diagram.png)
+
 ## What it does
 
 | Step | File | What happens |
@@ -23,14 +25,36 @@ Author: Madaka Chaithanya Nanda Kumar.
 
 ## Results (normal Atalanta vs this tool)
 
+All runs below were made on my laptop (WSL Ubuntu). Screenshots: [`docs/results/`](docs/results).
+
 | Circuit | Normal Atalanta | This tool |
 |---|---|---|
 | c17 | 100 %, 7 patterns | 100 %, simulator confirms 22/22 |
 | c17, own 3-pattern file | not possible | 81.818 %, 4 missed faults listed |
-| s298 (14 DFFs) | rejected: flip-flop exists | scan-converted, 100 %, 272/272 |
+| s298 (14 DFFs) | rejected: flip-flop exists | scan-converted, 49 patterns, 100 %, 272/272 |
+| c432 | 99.046 %, 4 aborted | **99.237 %, 3 aborted** (`--optimize`) |
 | c6288 | 99.251 %, 24 aborted | **99.406 %, 12 aborted** (simulator 99.53 %) |
 | c6288 redundant | 34 (in the log) | 34, plus saved undetected list |
 | my_test.bench (custom) | rejected | finds the planted redundant fault `t1/SA0` |
+
+## AI chat agent (plain-English control)
+
+I also connected the tools to an LLM chat agent (Google Gemini via its
+OpenAI-compatible API, function calling). From one sentence the agent
+chooses and chains the tools itself. Tested on my laptop:
+
+| Request | What the agent did | Result |
+|---|---|---|
+| "Generate test vectors for c17" | ATPG → parse report | 7 vectors, complete coverage |
+| "Generate test vectors for my_test.bench and tell me the redundant faults" | 5 tools chained: ATPG (auto scan) → parse → simulate → optimize → summary | 2 redundant, planted `t1/SA0` found |
+| "Generate test vectors for s27 … flip-flops converted" | convert_file → ATPG | 3 DFFs converted, 8 patterns, 100 % |
+| "Optimize ATPG for c432 and compare" | optimizer, built its own before/after table | 99.046 % → 99.237 %, aborted 4 → 3 |
+
+Notes: the chat front end is the DFTAgent `main.py` (not included here, see
+Credits) with these tools registered. Free Gemini keys are rate-limited
+(HTTP 429): wait between requests. Older models (e.g. gemini-2.5-flash) are
+not available to new accounts; list the models your key can use with
+`curl "https://generativelanguage.googleapis.com/v1beta/models?key=$GEMINI_API_KEY"`.
 
 ## Setup (Linux, or WSL Ubuntu on Windows)
 
@@ -79,4 +103,4 @@ files work as they are.
   No DFTAgent code is included here.
 - ISCAS'85 / ISCAS'89 benchmark circuits (F. Brglez et al.) in `benchmarks/`;
   `my_test.bench` is an original test circuit.
-- Code written with AI assistance (Claude).
+- Code written with AI assistance (Claude). Chat agent tested with Google Gemini.
